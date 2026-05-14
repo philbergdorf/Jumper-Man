@@ -3,27 +3,37 @@
 }
 
 html,
-body,
-#app {
+body {
   width: 100%;
   height: 100%;
   margin: 0;
 }
 
 body {
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  background: #090d18;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(47, 63, 104, 0.55), transparent 46%),
+    #090d18;
   color: #f8f4df;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 #app {
+  width: min(calc(100vw - 24px), calc((100dvh - 24px) * 16 / 9), 960px);
+  height: min(calc((100vw - 24px) * 9 / 16), calc(100dvh - 24px), 540px);
   display: grid;
   place-items: center;
+  overflow: hidden;
+  background: #101629;
+  border: 1px solid rgba(158, 231, 255, 0.28);
+  border-radius: 8px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.52);
 }
 
 canvas {
   display: block;
-  max-width: 100vw;
-  max-height: 100vh;
+  width: 100%;
+  height: 100%;
 }

@@ -7,8 +7,8 @@ const WORLD_WIDTH = 3650;
 const STREET_LEVEL = 600;
 const GROUND_Y = 456;
 const FLAG_X = 3310;
-const FLAG_TOP_Y = GROUND_Y - 178;
-const FLAG_BOTTOM_Y = GROUND_Y - 24;
+const FLAG_TOP_Y = GROUND_Y - 260;
+const FLAG_BOTTOM_Y = GROUND_Y - 18;
 const HIGH_SCORE_KEY = 'jumper-man-high-scores';
 const BASE_JUMP_VELOCITY = -430;
 const JUMP_HOLD_ACCELERATION = -1500;
@@ -18,6 +18,15 @@ const BASE_RUN_ACCELERATION = 1500;
 const BASE_RUN_SPEED = 330;
 const MAX_RUN_SPEED = 430;
 const MOMENTUM_BUILD_PER_SECOND = 0.09;
+const RETRO_FONT = '"Courier New", "Lucida Console", Monaco, monospace';
+const RETRO_SHADOW = {
+  offsetX: 2,
+  offsetY: 2,
+  color: '#050914',
+  blur: 0,
+  stroke: true,
+  fill: true
+};
 
 type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys;
 type HighScoreEntry = {
@@ -146,7 +155,7 @@ class RunnerScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.player.setDragX(1100);
     this.player.setMaxVelocity(BASE_RUN_SPEED, 620);
-    this.player.body?.setSize(32, 54).setOffset(8, 4);
+    this.player.body?.setSize(32, 58).setOffset(8, 6);
     this.player.setDepth(8);
     this.player.play('robot-idle');
 
@@ -176,7 +185,7 @@ class RunnerScene extends Phaser.Scene {
     this.goal = this.physics.add.staticImage(FLAG_X, GROUND_Y, 'flag');
     this.goal.setOrigin(0.5, 1);
     this.goal.setDepth(7);
-    this.goal.body?.setSize(34, 168).setOffset(14, 12);
+    this.goal.body?.setSize(48, 258).setOffset(20, 16);
     this.goal.refreshBody();
 
     this.physics.add.overlap(this.player, this.coins, (_player, coin) => this.collectCoin(coin as Phaser.GameObjects.GameObject), undefined, this);
@@ -190,45 +199,50 @@ class RunnerScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, WORLD_WIDTH, HEIGHT);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12, -120, 80);
 
-    this.scoreText = this.add.text(22, 18, 'Score 0', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '24px',
-      color: '#f8f4df',
-      stroke: '#12202c',
-      strokeThickness: 5
+    this.scoreText = this.add.text(22, 18, 'SCORE 0000', {
+      fontFamily: RETRO_FONT,
+      fontSize: '23px',
+      color: '#ffd166',
+      stroke: '#07101f',
+      strokeThickness: 5,
+      shadow: RETRO_SHADOW
     }).setScrollFactor(0);
 
-    this.coinsText = this.add.text(22, 52, `Coins 0/${this.totalCoins}`, {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '20px',
+    this.coinsText = this.add.text(22, 50, `COINS 0/${this.totalCoins}`, {
+      fontFamily: RETRO_FONT,
+      fontSize: '18px',
       color: '#f8f4df',
-      stroke: '#12202c',
-      strokeThickness: 4
+      stroke: '#07101f',
+      strokeThickness: 4,
+      shadow: RETRO_SHADOW
     }).setScrollFactor(0);
 
-    this.timeText = this.add.text(22, 80, 'Time 0.0s', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '20px',
-      color: '#f8f4df',
-      stroke: '#12202c',
-      strokeThickness: 4
+    this.timeText = this.add.text(22, 76, 'TIME 0.0s', {
+      fontFamily: RETRO_FONT,
+      fontSize: '18px',
+      color: '#9ee7ff',
+      stroke: '#07101f',
+      strokeThickness: 4,
+      shadow: RETRO_SHADOW
     }).setScrollFactor(0);
 
     this.messageText = this.add.text(WIDTH / 2, 92, '', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '28px',
-      color: '#ffffff',
+      fontFamily: RETRO_FONT,
+      fontSize: '24px',
+      color: '#fff0a6',
       align: 'center',
-      stroke: '#12202c',
-      strokeThickness: 6
+      stroke: '#07101f',
+      strokeThickness: 6,
+      shadow: RETRO_SHADOW
     }).setOrigin(0.5).setScrollFactor(0);
 
-    this.add.text(WIDTH - 24, 20, 'Arrow keys / WASD to move and jump', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '16px',
+    this.add.text(WIDTH - 24, 20, 'ARROWS / WASD  -  RUN + JUMP', {
+      fontFamily: RETRO_FONT,
+      fontSize: '14px',
       color: '#e4f0f2',
-      stroke: '#12202c',
-      strokeThickness: 3
+      stroke: '#07101f',
+      strokeThickness: 3,
+      shadow: RETRO_SHADOW
     }).setOrigin(1, 0).setScrollFactor(0);
 
     this.updateScoreHud();
@@ -377,29 +391,53 @@ class RunnerScene extends Phaser.Scene {
     graphics.generateTexture('antenna', 52, 68);
     graphics.clear();
 
-    graphics.fillStyle(0x172033, 0.28);
-    graphics.fillEllipse(30, 184, 58, 12);
-    graphics.fillStyle(0x243243, 1);
-    graphics.fillRoundedRect(13, 176, 34, 8, 3);
-    graphics.fillStyle(0xd8ebef, 1);
-    graphics.fillRoundedRect(23, 11, 8, 169, 3);
+    graphics.fillStyle(0x08101f, 0.32);
+    graphics.fillEllipse(41, 272, 82, 15);
+    graphics.fillStyle(0x1d2a3a, 1);
+    graphics.fillRoundedRect(16, 256, 50, 12, 4);
+    graphics.fillStyle(0x4f6979, 1);
+    graphics.fillRoundedRect(23, 246, 36, 13, 4);
+    graphics.fillStyle(0xc8d9df, 1);
+    graphics.fillRoundedRect(34, 13, 10, 238, 4);
+    graphics.fillStyle(0xf8f4df, 0.72);
+    graphics.fillRect(36, 19, 3, 226);
     graphics.fillStyle(0x6f8996, 1);
-    graphics.fillRect(29, 16, 3, 160);
+    graphics.fillRect(43, 21, 3, 224);
     graphics.fillStyle(0xffd166, 1);
-    graphics.fillCircle(27, 9, 8);
-    graphics.lineStyle(2, 0xfff0a6, 1);
-    graphics.strokeCircle(27, 9, 6);
-    graphics.fillStyle(0x12202c, 0.45);
-    graphics.fillTriangle(34, 31, 91, 54, 34, 78);
+    graphics.fillCircle(39, 10, 10);
+    graphics.fillStyle(0xfff0a6, 1);
+    graphics.fillCircle(36, 7, 3);
+    graphics.lineStyle(2, 0x9a6a1d, 1);
+    graphics.strokeCircle(39, 10, 8);
+
+    graphics.lineStyle(3, 0xf8f4df, 0.85);
+    graphics.lineBetween(47, 31, 47, 214);
+    graphics.lineStyle(2, 0x9ee7ff, 0.7);
+    graphics.lineBetween(31, 78, 53, 78);
+    graphics.lineBetween(31, 144, 53, 144);
+    graphics.fillStyle(0xffd166, 1);
+    graphics.fillCircle(47, 78, 4);
+    graphics.fillCircle(47, 144, 4);
+
+    graphics.fillStyle(0x09111f, 0.45);
+    graphics.fillTriangle(47, 33, 116, 53, 47, 102);
     graphics.fillStyle(0x4ecdc4, 1);
-    graphics.fillTriangle(31, 26, 88, 48, 31, 70);
+    graphics.fillTriangle(43, 27, 113, 48, 43, 95);
     graphics.fillStyle(0x76f3e9, 1);
-    graphics.fillTriangle(31, 26, 64, 39, 31, 50);
-    graphics.lineStyle(3, 0xf8f4df, 0.9);
-    graphics.lineBetween(34, 30, 84, 49);
-    graphics.lineStyle(2, 0x149f9a, 1);
-    graphics.lineBetween(35, 68, 87, 49);
-    graphics.generateTexture('flag', 96, 190);
+    graphics.fillTriangle(43, 27, 78, 38, 43, 56);
+    graphics.fillStyle(0x2bbdb4, 1);
+    graphics.fillTriangle(43, 56, 113, 48, 43, 74);
+    graphics.fillStyle(0x149f9a, 1);
+    graphics.fillTriangle(43, 74, 95, 60, 43, 95);
+    graphics.lineStyle(3, 0xf8f4df, 0.95);
+    graphics.lineBetween(46, 30, 108, 48);
+    graphics.lineStyle(2, 0x0d7672, 1);
+    graphics.lineBetween(46, 93, 112, 49);
+    graphics.lineStyle(2, 0xffffff, 0.42);
+    graphics.lineBetween(55, 35, 77, 42);
+    graphics.lineBetween(56, 64, 86, 57);
+
+    graphics.generateTexture('flag', 122, 280);
     graphics.destroy();
   }
 
@@ -441,9 +479,12 @@ class RunnerScene extends Phaser.Scene {
     graphics.lineStyle(6, 0x5f7480, 1);
     graphics.lineBetween(20, bodyY + 40, backFootX, backFootY - 2);
     graphics.lineBetween(31, bodyY + 40, frontFootX, frontFootY - 2);
+    graphics.fillStyle(0x243243, 1);
+    graphics.fillRoundedRect(backFootX - 7, backFootY - 4, 18, 8, 2);
+    graphics.fillRoundedRect(frontFootX - 7, frontFootY - 4, 18, 8, 2);
     graphics.fillStyle(0xc8d9df, 1);
-    graphics.fillRoundedRect(backFootX - 5, backFootY - 3, 15, 6, 2);
-    graphics.fillRoundedRect(frontFootX - 5, frontFootY - 3, 15, 6, 2);
+    graphics.fillRoundedRect(backFootX - 5, backFootY - 4, 14, 5, 2);
+    graphics.fillRoundedRect(frontFootX - 5, frontFootY - 4, 14, 5, 2);
     graphics.generateTexture(key, 48, 60);
     graphics.clear();
   }
@@ -747,8 +788,8 @@ class RunnerScene extends Phaser.Scene {
     });
 
     this.score = total;
-    this.scoreText.setText(`Score ${total}`);
-    this.messageText.setText(`Flag bonus +${flagBonus}`);
+    this.scoreText.setText(`SCORE ${total}`);
+    this.messageText.setText(`FLAG BONUS +${flagBonus}`);
     this.player.setAccelerationX(0);
     this.player.setMaxVelocity(280, 620);
     this.player.setVelocityX(255);
@@ -788,11 +829,12 @@ class RunnerScene extends Phaser.Scene {
 
     const markerY = Phaser.Math.Clamp(this.player.y - 30, FLAG_TOP_Y + 6, FLAG_BOTTOM_Y);
     const flagMarker = this.add.text(this.goal.x + 40, markerY, `+${flagBonus}`, {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '24px',
+      fontFamily: RETRO_FONT,
+      fontSize: '22px',
       color: '#ffd166',
       stroke: '#050914',
-      strokeThickness: 5
+      strokeThickness: 5,
+      shadow: RETRO_SHADOW
     }).setOrigin(0, 0.5).setDepth(90);
 
     this.tweens.add({
@@ -852,54 +894,63 @@ class RunnerScene extends Phaser.Scene {
     this.highScorePanel?.destroy(true);
 
     const panel = this.add.container(WIDTH / 2, HEIGHT / 2).setScrollFactor(0).setDepth(1000);
-    const backdrop = this.add.rectangle(0, 0, WIDTH, HEIGHT, 0x050914, 0.58);
-    const card = this.add.rectangle(0, 0, 560, 390, 0x132033, 0.96);
-    const cardStroke = this.add.rectangle(0, 0, 560, 390).setStrokeStyle(3, 0x9ee7ff, 0.9);
+    const backdrop = this.add.rectangle(0, 0, WIDTH, HEIGHT, 0x050914, 0.62);
+    const card = this.add.rectangle(0, 0, 590, 392, 0x10182e, 0.97);
+    const cardGlow = this.add.rectangle(0, 0, 604, 406).setStrokeStyle(2, 0x4ecdc4, 0.28);
+    const cardStroke = this.add.rectangle(0, 0, 590, 392).setStrokeStyle(3, 0xffd166, 0.86);
+    const titleBar = this.add.rectangle(0, -157, 500, 3, 0x4ecdc4, 0.9);
     const title = this.add.text(0, -158, rank === 1 ? 'NEW HIGH SCORE' : 'FINISH', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '34px',
+      fontFamily: RETRO_FONT,
+      fontSize: '32px',
       color: '#ffd166',
       stroke: '#050914',
-      strokeThickness: 6
+      strokeThickness: 6,
+      shadow: RETRO_SHADOW
     }).setOrigin(0.5);
 
-    const breakdown = this.add.text(0, -112, `Score ${total}   Coins ${coinScore}   Speed ${speedScore}   Flag ${flagBonus}   Time ${elapsedSeconds.toFixed(1)}s`, {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '16px',
-      color: '#f8f4df',
+    const breakdown = this.add.text(0, -112, `SCORE ${total}   COINS ${coinScore}   SPEED ${speedScore}   FLAG ${flagBonus}   TIME ${elapsedSeconds.toFixed(1)}S`, {
+      fontFamily: RETRO_FONT,
+      fontSize: '14px',
+      color: '#fff0a6',
       stroke: '#050914',
-      strokeThickness: 4
+      strokeThickness: 4,
+      shadow: RETRO_SHADOW
     }).setOrigin(0.5);
 
     const heading = this.add.text(-224, -62, 'HIGH SCORES', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '20px',
+      fontFamily: RETRO_FONT,
+      fontSize: '18px',
       color: '#9ee7ff',
       stroke: '#050914',
-      strokeThickness: 4
+      strokeThickness: 4,
+      shadow: RETRO_SHADOW
     }).setOrigin(0, 0.5);
 
-    panel.add([backdrop, card, cardStroke, title, breakdown, heading]);
+    const headingRule = this.add.rectangle(0, -42, 472, 2, 0x2f4f6b, 1);
+    panel.add([backdrop, cardGlow, card, cardStroke, titleBar, title, breakdown, heading, headingRule]);
 
     const rows = scores.length > 0 ? scores : [{ score: total, coins: this.coinsCollected, time: elapsedSeconds, date: new Date().toISOString() }];
     rows.slice(0, 5).forEach((entry, index) => {
       const isCurrent = index + 1 === rank;
       const y = -24 + index * 42;
-      const rowBack = this.add.rectangle(0, y, 472, 32, isCurrent ? 0x29445a : 0x1b2a42, isCurrent ? 0.95 : 0.65);
-      const row = this.add.text(-224, y, `${index + 1}.  ${entry.score} pts    ${entry.coins}/${this.totalCoins} coins    ${entry.time.toFixed(1)}s`, {
-        fontFamily: 'Arial, sans-serif',
-        fontSize: '18px',
-        color: isCurrent ? '#ffd166' : '#f8f4df'
+      const rowBack = this.add.rectangle(0, y, 492, 33, isCurrent ? 0x29445a : 0x17233a, isCurrent ? 0.95 : 0.74);
+      const row = this.add.text(-236, y, `${index + 1}  ${entry.score} PTS    ${entry.coins}/${this.totalCoins} COINS    ${entry.time.toFixed(1)}S`, {
+        fontFamily: RETRO_FONT,
+        fontSize: '16px',
+        color: isCurrent ? '#ffd166' : '#f8f4df',
+        stroke: '#050914',
+        strokeThickness: 2
       }).setOrigin(0, 0.5);
       panel.add([rowBack, row]);
     });
 
-    const prompt = this.add.text(0, 158, 'Press Space to run again', {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '20px',
+    const prompt = this.add.text(0, 158, 'PRESS SPACE TO RUN AGAIN', {
+      fontFamily: RETRO_FONT,
+      fontSize: '18px',
       color: '#4ecdc4',
       stroke: '#050914',
-      strokeThickness: 4
+      strokeThickness: 4,
+      shadow: RETRO_SHADOW
     }).setOrigin(0.5);
     panel.add(prompt);
 
@@ -960,9 +1011,9 @@ class RunnerScene extends Phaser.Scene {
   private updateScoreHud() {
     const elapsedSeconds = this.elapsedSeconds();
     this.score = this.coinsCollected * 250 + this.speedScore(elapsedSeconds);
-    this.scoreText.setText(`Score ${this.score}`);
-    this.coinsText.setText(`Coins ${this.coinsCollected}/${this.totalCoins}`);
-    this.timeText.setText(`Time ${elapsedSeconds.toFixed(1)}s`);
+    this.scoreText.setText(`SCORE ${this.score}`);
+    this.coinsText.setText(`COINS ${this.coinsCollected}/${this.totalCoins}`);
+    this.timeText.setText(`TIME ${elapsedSeconds.toFixed(1)}s`);
   }
 
   private elapsedSeconds() {
