@@ -3,9 +3,12 @@ import './styles.css';
 
 const WIDTH = 960;
 const HEIGHT = 540;
-const WORLD_WIDTH = 3400;
+const WORLD_WIDTH = 3650;
 const STREET_LEVEL = 600;
 const GROUND_Y = 456;
+const FLAG_X = 3310;
+const FLAG_TOP_Y = GROUND_Y - 178;
+const FLAG_BOTTOM_Y = GROUND_Y - 24;
 const HIGH_SCORE_KEY = 'jumper-man-high-scores';
 const BASE_JUMP_VELOCITY = -430;
 const JUMP_HOLD_ACCELERATION = -1500;
@@ -91,6 +94,7 @@ class RunnerScene extends Phaser.Scene {
   private runStartedAt = 0;
   private runStarted = false;
   private finished = false;
+  private finishing = false;
   private invulnerable = false;
   private jumpHoldMs = 0;
   private jumpExtending = false;
@@ -108,6 +112,7 @@ class RunnerScene extends Phaser.Scene {
     this.score = 0;
     this.coinsCollected = 0;
     this.finished = false;
+    this.finishing = false;
     this.invulnerable = false;
     this.runStarted = false;
     this.runStartedAt = 0;
@@ -160,7 +165,7 @@ class RunnerScene extends Phaser.Scene {
       [2510, 410],
       [2795, 388],
       [3090, 350],
-      [3260, 410]
+      [3200, 410]
     ].forEach(([x, y]) => {
       const coin = this.coins.create(x, y, 'coin') as Phaser.Physics.Arcade.Image;
       coin.setCircle(14, 8, 8);
@@ -168,8 +173,11 @@ class RunnerScene extends Phaser.Scene {
     });
     this.totalCoins = this.coins.getLength();
 
-    this.goal = this.physics.add.staticImage(3310, GROUND_Y - 60, 'flag');
-    this.goal.body?.setSize(60, 110).setOffset(10, 10);
+    this.goal = this.physics.add.staticImage(FLAG_X, GROUND_Y, 'flag');
+    this.goal.setOrigin(0.5, 1);
+    this.goal.setDepth(7);
+    this.goal.body?.setSize(34, 168).setOffset(14, 12);
+    this.goal.refreshBody();
 
     this.physics.add.overlap(this.player, this.coins, (_player, coin) => this.collectCoin(coin as Phaser.GameObjects.GameObject), undefined, this);
     this.physics.add.overlap(this.player, this.goal, () => this.reachGoal(), undefined, this);
@@ -231,6 +239,15 @@ class RunnerScene extends Phaser.Scene {
       if (Phaser.Input.Keyboard.JustDown(this.wasd.SPACE)) {
         this.scene.restart();
       }
+      return;
+    }
+
+    if (this.finishing) {
+      const body = this.player.body as Phaser.Physics.Arcade.Body;
+      this.player.setAccelerationX(0);
+      this.player.setVelocityX(255);
+      this.player.setFlipX(false);
+      this.updatePlayerAnimation(false, true, body);
       return;
     }
 
@@ -360,13 +377,29 @@ class RunnerScene extends Phaser.Scene {
     graphics.generateTexture('antenna', 52, 68);
     graphics.clear();
 
-    graphics.fillStyle(0x27384a, 1);
-    graphics.fillRect(8, 0, 8, 120);
+    graphics.fillStyle(0x172033, 0.28);
+    graphics.fillEllipse(30, 184, 58, 12);
+    graphics.fillStyle(0x243243, 1);
+    graphics.fillRoundedRect(13, 176, 34, 8, 3);
+    graphics.fillStyle(0xd8ebef, 1);
+    graphics.fillRoundedRect(23, 11, 8, 169, 3);
+    graphics.fillStyle(0x6f8996, 1);
+    graphics.fillRect(29, 16, 3, 160);
+    graphics.fillStyle(0xffd166, 1);
+    graphics.fillCircle(27, 9, 8);
+    graphics.lineStyle(2, 0xfff0a6, 1);
+    graphics.strokeCircle(27, 9, 6);
+    graphics.fillStyle(0x12202c, 0.45);
+    graphics.fillTriangle(34, 31, 91, 54, 34, 78);
     graphics.fillStyle(0x4ecdc4, 1);
-    graphics.fillTriangle(16, 8, 76, 31, 16, 54);
-    graphics.fillStyle(0xf8f4df, 1);
-    graphics.fillCircle(12, 4, 8);
-    graphics.generateTexture('flag', 84, 124);
+    graphics.fillTriangle(31, 26, 88, 48, 31, 70);
+    graphics.fillStyle(0x76f3e9, 1);
+    graphics.fillTriangle(31, 26, 64, 39, 31, 50);
+    graphics.lineStyle(3, 0xf8f4df, 0.9);
+    graphics.lineBetween(34, 30, 84, 49);
+    graphics.lineStyle(2, 0x149f9a, 1);
+    graphics.lineBetween(35, 68, 87, 49);
+    graphics.generateTexture('flag', 96, 190);
     graphics.destroy();
   }
 
@@ -681,7 +714,7 @@ class RunnerScene extends Phaser.Scene {
   }
 
   private loseLife() {
-    if (this.invulnerable || this.finished) {
+    if (this.invulnerable || this.finished || this.finishing) {
       return;
     }
 
@@ -696,15 +729,16 @@ class RunnerScene extends Phaser.Scene {
   }
 
   private reachGoal() {
-    if (this.finished) {
+    if (this.finished || this.finishing) {
       return;
     }
 
-    this.finished = true;
+    this.finishing = true;
     const elapsedSeconds = this.elapsedSeconds();
     const coinScore = this.coinsCollected * 250;
     const speedScore = this.speedScore(elapsedSeconds);
-    const total = coinScore + speedScore;
+    const flagBonus = this.flagBonus();
+    const total = coinScore + speedScore + flagBonus;
     const { scores, rank } = this.saveHighScore({
       score: total,
       coins: this.coinsCollected,
@@ -714,40 +748,70 @@ class RunnerScene extends Phaser.Scene {
 
     this.score = total;
     this.scoreText.setText(`Score ${total}`);
+    this.messageText.setText(`Flag bonus +${flagBonus}`);
     this.player.setAccelerationX(0);
-    this.player.setVelocity(0, 0);
-    this.playFinishEffect();
-    this.time.delayedCall(500, () => {
-      this.showHighScoreScreen(total, coinScore, speedScore, elapsedSeconds, scores, rank);
+    this.player.setMaxVelocity(280, 620);
+    this.player.setVelocityX(255);
+    this.player.setFlipX(false);
+    this.player.play('robot-run', true);
+    this.goal.body.enable = false;
+    this.playFinishEffect(flagBonus);
+    this.time.delayedCall(1250, () => {
+      this.finishing = false;
+      this.finished = true;
+      this.player.setAccelerationX(0);
+      this.player.setVelocity(0, 0);
+      this.showHighScoreScreen(total, coinScore, speedScore, flagBonus, elapsedSeconds, scores, rank);
     });
   }
 
   private endGame(message: string) {
+    this.finishing = false;
     this.finished = true;
     this.player.setAccelerationX(0);
     this.player.setVelocity(0, 0);
     this.messageText.setText(message);
   }
 
-  private playFinishEffect() {
+  private playFinishEffect(flagBonus: number) {
     this.cameras.main.flash(420, 255, 241, 180);
     this.cameras.main.shake(240, 0.004);
 
     this.tweens.add({
       targets: this.goal,
-      scale: 1.14,
+      scale: 1.08,
       yoyo: true,
       repeat: 3,
       duration: 120,
       ease: 'Sine.easeInOut'
     });
 
+    const markerY = Phaser.Math.Clamp(this.player.y - 30, FLAG_TOP_Y + 6, FLAG_BOTTOM_Y);
+    const flagMarker = this.add.text(this.goal.x + 40, markerY, `+${flagBonus}`, {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: '24px',
+      color: '#ffd166',
+      stroke: '#050914',
+      strokeThickness: 5
+    }).setOrigin(0, 0.5).setDepth(90);
+
     this.tweens.add({
-      targets: this.player,
-      y: this.player.y - 22,
-      yoyo: true,
-      duration: 180,
-      ease: 'Sine.easeOut'
+      targets: flagMarker,
+      y: markerY - 48,
+      alpha: 0,
+      duration: 1050,
+      ease: 'Cubic.easeOut',
+      onComplete: () => flagMarker.destroy()
+    });
+
+    const finishRibbon = this.add.rectangle(this.goal.x + 15, markerY, 78, 5, 0xffd166, 0.9).setDepth(88);
+    this.tweens.add({
+      targets: finishRibbon,
+      x: this.goal.x + 80,
+      alpha: 0,
+      duration: 640,
+      ease: 'Sine.easeOut',
+      onComplete: () => finishRibbon.destroy()
     });
 
     const colors = [0xffd166, 0x4ecdc4, 0xf25f5c, 0xf8f4df, 0x9ee7ff];
@@ -779,6 +843,7 @@ class RunnerScene extends Phaser.Scene {
     total: number,
     coinScore: number,
     speedScore: number,
+    flagBonus: number,
     elapsedSeconds: number,
     scores: HighScoreEntry[],
     rank: number
@@ -798,9 +863,9 @@ class RunnerScene extends Phaser.Scene {
       strokeThickness: 6
     }).setOrigin(0.5);
 
-    const breakdown = this.add.text(0, -112, `Score ${total}   Coins ${coinScore}   Speed ${speedScore}   Time ${elapsedSeconds.toFixed(1)}s`, {
+    const breakdown = this.add.text(0, -112, `Score ${total}   Coins ${coinScore}   Speed ${speedScore}   Flag ${flagBonus}   Time ${elapsedSeconds.toFixed(1)}s`, {
       fontFamily: 'Arial, sans-serif',
-      fontSize: '18px',
+      fontSize: '16px',
       color: '#f8f4df',
       stroke: '#050914',
       strokeThickness: 4
@@ -884,6 +949,12 @@ class RunnerScene extends Phaser.Scene {
     } catch {
       return [];
     }
+  }
+
+  private flagBonus() {
+    const hitY = this.player.body.center.y;
+    const heightScore = Phaser.Math.Clamp((FLAG_BOTTOM_Y - hitY) / (FLAG_BOTTOM_Y - FLAG_TOP_Y), 0, 1);
+    return Phaser.Math.Snap.To(Math.round(Phaser.Math.Linear(500, 2500, heightScore)), 100);
   }
 
   private updateScoreHud() {
