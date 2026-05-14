@@ -43,7 +43,7 @@ class BackgroundMusic {
   start() {
     if (!this.audio) {
       const musicWindow = window as MusicWindow;
-      this.audio = musicWindow.jumperManMusic ?? new Audio('/song.mp4');
+      this.audio = musicWindow.jumperManMusic ?? new Audio(`${import.meta.env.BASE_URL}song.mp4`);
       musicWindow.jumperManMusic = this.audio;
       this.audio.loop = true;
       this.audio.volume = 0.55;
